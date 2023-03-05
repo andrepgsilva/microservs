@@ -1,0 +1,69 @@
+services:
+  micro-products:
+    build:
+      context: .
+      dockerfile: Dockerfile-products
+    volumes:
+      - ./micro-products:/home/node/app
+    ports:
+      - 3000:3000
+    
+  mongo:
+    image: mongo
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: example
+    volumes:
+      - ./.docker/mongodbdata:/data/db
+    ports:
+      - 27017:27017
+
+  mongo-express:
+    image: mongo-express
+    restart: always
+    ports:
+      - 8081:8081
+    environment:
+      ME_CONFIG_MONGODB_ADMINUSERNAME: root
+      ME_CONFIG_MONGODB_ADMINPASSWORD: example
+      ME_CONFIG_MONGODB_URL: mongodb://root:example@mongo:27017/
+  
+  micro-cart:
+    build:
+      context: .
+      dockerfile: Dockerfile-cart
+    volumes:
+      - ./micro-cart:/home/node/app
+    ports:
+      - 3001:3000
+    depends_on:
+      - postgres
+
+  postgres:
+    image: postgres:15-alpine
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: example
+      POSTGRES_DB: micro-cart
+    volumes:
+      - ./.docker/postgresdbdata:/var/lib/postgresql/data
+    ports:
+      - 5432:5432
+
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - 8080:8080
+    depends_on:
+      - postgres
+
+  restapi:
+    build:
+      context: .
+      dockerfile: Dockerfile-restapi
+    volumes:
+      - ./restapi:/home/node/app
+    ports:
+      - 3002:3000

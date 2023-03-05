@@ -1,0 +1,10 @@
+FROM node:19-alpine
+
+USER node
+
+WORKDIR /home/node/app
+
+COPY micro-products /home/node/app
+
+CMD [ "tail", "-f", "/dev/null" ]
+
